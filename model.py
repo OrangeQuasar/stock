@@ -36,4 +36,13 @@ def train(df):
 
     print("Accuracy:",acc)
 
-    return model,X
+    importance = sorted(
+        zip(
+            X.columns,
+            model.feature_importances_
+        ),
+        key=lambda x: x[1],
+        reverse=True
+    )
+
+    return model, X, importance

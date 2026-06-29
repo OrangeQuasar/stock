@@ -10,7 +10,7 @@ SYM = {
     "cme": "NKD=F"
 }
 
-OLLAMA_MODEL = "qwen3:8b"
+OLLAMA_MODEL = "gemma4"
 
 BUY_THRESHOLD = 0.70
 SELL_THRESHOLD = 0.30

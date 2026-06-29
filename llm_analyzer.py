@@ -1,5 +1,5 @@
 import ollama
-from stock.config import OLLAMA_MODEL
+from config import OLLAMA_MODEL
 
 def analyze_news(news):
 

@@ -1,6 +1,6 @@
 import yfinance as yf
 import pandas as pd
-from stock.config import START_DATE, SYM
+from config import START_DATE, SYM
 
 def download_market():
 
