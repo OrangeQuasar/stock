@@ -10,13 +10,14 @@ def train(df):
 
     y = df["TARGET"]
 
+    # 80%を学習、20%をテスト（バックテスト用）に分割
     split = int(len(df)*0.8)
 
-    X_train = X[:split]
-    X_test = X[split:]
+    X_train = X.iloc[:split]
+    X_test = X.iloc[split:]
 
-    y_train = y[:split]
-    y_test = y[split:]
+    y_train = y.iloc[:split]
+    y_test = y.iloc[split:]
 
     model = XGBClassifier(
         tree_method="hist",
@@ -25,7 +26,8 @@ def train(df):
         learning_rate=0.03
     )
 
-    model.fit(X_train,y_train)
+    # 学習データのみで訓練する
+    model.fit(X_train, y_train)
 
     pred = model.predict(X_test)
 
@@ -34,7 +36,7 @@ def train(df):
         pred
     )
 
-    print("Accuracy:",acc)
+    print("Accuracy (Test Data):", acc)
 
     importance = sorted(
         zip(
@@ -45,4 +47,5 @@ def train(df):
         reverse=True
     )
 
-    return model, X, importance
+    # バックテスト用に X_test と df のテスト期間も返す
+    return model, X, X_test, df.iloc[split:], importance

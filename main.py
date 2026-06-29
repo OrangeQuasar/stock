@@ -89,88 +89,57 @@ elif score == 0:
 else:
     print("ニュース判定: 弱気")
 
-df["LLM_SCORE"] = score
+# 削除: df["LLM_SCORE"] = score
+# (過去の全データに今日のスコアが混ざるのを防ぐため削除)
 
 df = create_features(df)
 
 print("学習")
 
-model, X, importance = train(df)
+# model.pyの変更に合わせて受け取る変数を増やす
+model, X, X_test, df_test, importance = train(df)
 
 print("\n========== 重要特徴量 TOP10 ==========")
-
 for name, value in importance[:10]:
-
-    print(
-        f"{name:<25}"
-        f"{value:.4f}"
-    )
+    print(f"{name:<25}{value:.4f}")
 
 print("\n========== 最新特徴量 ==========")
-
 latest = X.iloc[-1]
-
-for col in [
-    "cme_1D",
-    "nasdaq_1D",
-    "sox_1D",
-    "sp500_1D",
-    "usdjpy_1D",
-    "RSI"
-]:
-
+for col in ["cme_1D", "nasdaq_1D", "sox_1D", "sp500_1D", "usdjpy_1D", "RSI"]:
     if col in latest.index:
-
-        print(
-            f"{col:<15}: "
-            f"{latest[col]:.3f}"
-        )
+        print(f"{col:<15}: {latest[col]:.3f}")
 
 latest = X.iloc[-1:]
 
-prob = model.predict_proba(
-    latest
-)[0][1]
+prob = model.predict_proba(latest)[0][1]
 
 print("\n=================")
-print(
-    f"翌日上昇確率:{prob*100:.1f}%"
-)
+print(f"翌日上昇確率:{prob*100:.1f}%")
 
 print("\n========== 総合判定 ==========")
+print(f"AI予測確率: {prob*100:.1f}%")
+print(f"ニューススコア: {score}")
 
-print(
-    f"翌日上昇確率: "
-    f"{prob*100:.1f}%"
-)
-
-if prob > 0.75:
-
+# 予測確率とニューススコアを組み合わせて最終判定を出すロジックに変更
+if prob > 0.60 and score >= 2:
     print("判定: 非常に強気")
-    print("推奨: 4.3倍ブル買い候補")
-
-elif prob > 0.60:
-
+    print("推奨: 買い候補")
+elif prob > 0.55:
     print("判定: 強気")
     print("推奨: 保有継続")
-
 elif prob > 0.45:
-
     print("判定: 中立")
     print("推奨: 様子見")
-
-elif prob > 0.30:
-
+elif prob > 0.35:
     print("判定: 弱気")
     print("推奨: ポジション縮小")
-
 else:
-
     print("判定: 非常に弱気")
     print("推奨: 新規購入見送り")
 
+# バックテストには、AIが学習していない「テストデータ(X_test)」のみを渡す
 run_backtest(
     model,
-    X,
-    df["nikkei"]
+    X_test,
+    df_test["nikkei"]
 )
